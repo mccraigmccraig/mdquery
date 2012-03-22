@@ -131,17 +131,27 @@ module MDQuery
     # DSL for defining a Dataset with a number of Measures over a number of Dimensions
     # where each Dimension consists of a number of Segments
     class DatasetDSL
+
+      # define the datasource for the Dataset
+      # * +scope+ an ActiveRecord scope, used as the basis for all region queries
       def source(scope)
         raise "source already set" if @source_scope
         @source_scope = scope
       end
 
-      def dimension(k, &proc)
-        @dimensions << DimensionDSL.new(k, &proc)
+      # define a Dimension
+      # * +key+ the key identifying the Dimension in the Dataset
+      # * +proc+ a DimensionDSL Proc
+      def dimension(key, &proc)
+        @dimensions << DimensionDSL.new(key, &proc)
       end
 
-      def measure(k,d,c=nil)
-        @measures << MeasureDSL.new(k,d,c)
+      # define a Measure
+      # * +key+ the key identifying the Measure in the Dataset
+      # * +definition+ the SQL fragment defining the measure
+      # * +cast+ a symbol identifying a case from MDQuery::Model::CASTS. Optional
+      def measure(key, definition, cast=nil)
+        @measures << MeasureDSL.new(key, definition, cast)
       end
 
       private
