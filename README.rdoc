@@ -2,6 +2,49 @@
 
 Defines a DSL for specifying and executing segmented multi-dimensional queries on your ActiveRecord-3 models
 
+== Installation
+
+  gem install mdquery
+
+== Usage
+
+A Dataset defines a Source and some Dimensions and some Measures. Measures are aggregate functions to be computed. Each Dimension consists of 1 or more Segments, and each Segment either fixes a value for the Dimension or extracts values from the datasource. Each Segment defines an ActiveRecord scope which will narrow the datasource according to the Dimension value or values for the Segment. Given the definition of the Dataset, it will query the datasource to extract data points, each of which will have a value for each Dimension and a value for each Measure
+
+  require 'mdquery'
+
+  Q = MDQuery.dataset do
+    source Foo
+
+    measure :count, "count(*)", :int
+
+    dimension :time do
+      label "Time"
+
+      segment(:all) do
+        fix_dimension :all
+      end
+
+      segment(:five_years) do
+        narrow{|scope| scope.where("foos.created_at > now() - interval '5 years'")}
+        extract_dimension "extract(year from foos.created_at)"
+        values{|scope| (Date.today.year-4..Date.today.year).to_a.map(&:to_s)}
+      end
+    end
+
+    dimension :users do
+      label "Users"
+
+      segment(:all) do
+        fix_dimension :all
+      end
+
+      segment(:by_type) do
+        extract_dimension "user_types.name"
+        narrow{|scope| scope.joins(:user_types)}
+      end
+    end
+  end
+
 == Contributing to mdquery
 
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet.
