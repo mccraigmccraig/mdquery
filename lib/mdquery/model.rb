@@ -30,6 +30,7 @@ module MDQuery
 
       def initialize(attrs)
         MDQuery::Util.assign_attributes(self, attrs)
+        $stderr << inspect << "\n\n\n"
         validate
       end
 

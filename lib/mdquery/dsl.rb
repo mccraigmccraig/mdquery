@@ -3,48 +3,57 @@ require 'mdquery/model'
 module MDQuery
   module DSL
 
+    # DSL for describing a DimensionSegment
     class DimensionSegmentDSL
-      attr_reader :dimension
-      attr_reader :key
-      attr_reader :fixed_dimension_value
-      attr_reader :extract_dimension_query
-      attr_reader :narrow_proc
-      attr_reader :value_proc
-      attr_reader :label_proc
-      attr_reader :value_cast
-      attr_reader :measure_modifiers
 
+      # fix the Dimension value for this segment. exclusive of +extract_dimension+
+      # * +v+ the Dimension value for this segment
       def fix_dimension(v)
         @fixed_dimension_value=v
       end
 
+      # extract DimensionValues from data for this segment. exclusive of +fix_dimension+
+      # * +q+ SQL select string fragment for the dimension value
       def extract_dimension(q)
         @extract_dimension_query=q
       end
 
+      # Narrow the datasource to extract this segment. Optional
+      # * +proc+ a Proc of a single parameter, an ActiveRecord Scope to be narrowed
       def narrow(&proc)
         raise "no block!" if !proc
         @narrow_proc = proc
       end
 
+      # Define an ordered list of all possible Dimension Values for the segment. Optional
+      # * +proc+ a Proc of a single parameter, an ActiveRecord Scope which can be used
+      # to query for the values
       def values(&proc)
         raise "no block!" if !proc
         @value_proc = proc
       end
 
+      # set a Proc to be used to convert Dimension values into labels. Optional
+      # * +proc+ a Proc of a single parameter which will be called to convert Dimension values
+      # into labels
       def label(&proc)
         raise "no block!" if !proc
         @label_proc = proc
       end
 
+      # define a cast to convert values into the desired datatype
+      # * +c+ a keyword key for the casts in MDQuery::Model::Casts
       def cast(c)
         raise "unknown cast: #{c.inspect}" if !MDQuery::Model::CASTS.keys.include?(c)
         @value_cast = c
       end
 
+      # set a Proc to be used to modify the measure-value in any query using this segment
+      # * +measure+ a keyword describing the Measure
+      # * +proc+ a Proc of a single parameter which will be used to transform the measure value
       def modify(measure, &proc)
         raise "no block!" if !proc
-        measure_modifiers[measure] = proc
+        @measure_modifiers[measure] = proc
       end
 
       private
@@ -53,19 +62,18 @@ module MDQuery
         @key = key
         @measure_modifiers = {}
         self.instance_eval(&proc)
-        validate
       end
 
       def build(dimension)
-        MDQuery::Model::DimensionSegmentModel.new(:dimension=>dimension,
-                                                  :key=>key,
-                                                  :fixed_dimension_value=>fixed_dimension_value,
-                                                  :extract_dimension_query=>extract_dimension_query,
-                                                  :narrow_proc=>narrow_proc,
-                                                  :value_proc=>value_proc,
-                                                  :label_proc=>label_proc,
-                                                  :value_cast=>value_cast,
-                                                  :measure_modifiers=>measure_modifiers)
+        MDQuery::Model::DimensionSegmentModel.new(:dimension_model=>dimension,
+                                                  :key=>@key,
+                                                  :fixed_dimension_value=>@fixed_dimension_value,
+                                                  :extract_dimension_query=>@extract_dimension_query,
+                                                  :narrow_proc=>@narrow_proc,
+                                                  :value_proc=>@value_proc,
+                                                  :label_proc=>@label_proc,
+                                                  :value_cast=>@value_cast,
+                                                  :measure_modifiers=>@measure_modifiers)
       end
     end
 
