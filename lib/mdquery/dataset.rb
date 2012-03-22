@@ -44,7 +44,7 @@ module MDQuery
   end
 
   class Dataset
-    attr_reader :definition
+    attr_reader :model
     attr_reader :dimensions
     attr_reader :measures
     attr_reader :data
@@ -65,7 +65,7 @@ module MDQuery
     private
 
     def validate
-      raise "no definition!" if !definition
+      raise "no model!" if !model
       raise "no dimensions!" if !dimensions
       raise "no measures!" if !measures
       raise "no data!" if !data

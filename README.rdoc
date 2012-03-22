@@ -1,6 +1,6 @@
 = mdquery
 
-Defines a DSL for specifying segmented multi-dimensional queries on your ActiveRecord-3 models
+Defines a DSL for specifying and executing segmented multi-dimensional queries on your ActiveRecord-3 models
 
 == Contributing to mdquery
 
