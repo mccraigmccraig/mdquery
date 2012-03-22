@@ -30,7 +30,7 @@ module MDQuery
       # to query for the values
       def values(&proc)
         raise "no block!" if !proc
-        @value_proc = proc
+        @values_proc = proc
       end
 
       # set a Proc to be used to convert Dimension values into labels. Optional
@@ -70,7 +70,7 @@ module MDQuery
                                                   :fixed_dimension_value=>@fixed_dimension_value,
                                                   :extract_dimension_query=>@extract_dimension_query,
                                                   :narrow_proc=>@narrow_proc,
-                                                  :value_proc=>@value_proc,
+                                                  :values_proc=>@values_proc,
                                                   :label_proc=>@label_proc,
                                                   :value_cast=>@value_cast,
                                                   :measure_modifiers=>@measure_modifiers)

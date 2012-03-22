@@ -19,7 +19,7 @@ module MDQuery
       attr_reader :fixed_dimension_value
       attr_reader :extract_dimension_query
       attr_reader :narrow_proc
-      attr_reader :value_proc
+      attr_reader :values_proc
       attr_reader :label_proc
       attr_reader :value_cast
       attr_reader :measure_modifiers
@@ -86,8 +86,8 @@ module MDQuery
       def get_values(scope)
         if fixed_dimension_value
           [fixed_dimension_value.to_s]
-        elsif value_proc
-          value_proc.call(scope)
+        elsif values_proc
+          values_proc.call(scope)
         else
           narrowed_scope = do_narrow(scope)
           records = narrowed_scope.select("distinct #{select_string}").all
