@@ -77,16 +77,18 @@ module MDQuery
       end
     end
 
+    # DSL for describing a Dimension consisting of an ordered list of segments
     class DimensionDSL
-      attr_reader :key
-      attr_reader :label
-      attr_reader :segments
-
+      # define a segment
+      # * +key+ the segment key, should be unique in the Dimension
+      # * +proc+ the DimensionSegmentDSL Proc
       def segment(key, &proc)
         raise "no block!" if !proc
-        @segments << DimensionSegmentDSL.new(self, key)
+        @segments << DimensionSegmentDSL.new(key, &proc)
       end
 
+      # set the Label for the segment
+      # * +label+ a label for the segment
       def label(l)
         @label = l
       end
@@ -101,38 +103,34 @@ module MDQuery
       end
 
       def build
-        dd = MDQuery::Model::DimensionModel.new(:key=>key, :label=>label)
-        ss = segments.map{|dsdsl| dsdsl.send(:build, dd)}
-        dd.instance_eval{@segments = ss}
+        dd = MDQuery::Model::DimensionModel.new(:key=>@key, :label=>@label)
+        ss = @segments.map{|dsdsl| dsdsl.send(:build, dd)}
+        dd.instance_eval{@segment_models = ss}
         dd.validate
         dd
       end
     end
 
+    # DSL for defining Measures
     class MeasureDSL
-      attr_reader :key
-      attr_reader :definition
-      attr_reader :cast
-
       private
 
       def initialize(key, definition, cast=nil)
         @key = key
         @definition = definition
-        raise "unknown cast: #{cast.inspect}" if !CASTS.keys.include?(cast)
         @cast = cast
       end
 
       def build
-        MDQuery::Model::MeasureModel.new(key, definition, cast)
+        MDQuery::Model::MeasureModel.new(:key=>@key,
+                                         :definition=>@definition,
+                                         :cast=>@cast)
       end
     end
 
+    # DSL for defining a Dataset with a number of Measures over a number of Dimensions
+    # where each Dimension consists of a number of Segments
     class DatasetDSL
-      attr_reader :source_scope
-      attr_reader :dimensions
-      attr_reader :measures
-
       def source(scope)
         raise "source already set" if @source_scope
         @source_scope = scope
@@ -156,9 +154,9 @@ module MDQuery
       end
 
       def build
-        ds = dimensions.map(&:build)
-        ms = measures.map(&:build)
-        MDQuery::Model::DatasetModel.new(:source_scope=>source_scope,
+        ds = @dimensions.map{|d| d.send(:build)}
+        ms = @measures.map{|m| m.send(:build)}
+        MDQuery::Model::DatasetModel.new(:source_scope=>@source_scope,
                                          :dimension_models=>ds,
                                          :measure_models=>ms)
       end

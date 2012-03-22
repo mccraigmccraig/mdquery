@@ -5,7 +5,7 @@ module MDQuery::DSL
   describe MDQuery::DSL do
     describe DimensionSegmentDSL do
 
-      it "should create a DimensionSegmentModel for a fixed dimension-value" do
+      it "should build a DimensionSegmentModel for a fixed dimension-value" do
         dimension_model = Object.new
         narrow_proc = lambda{}
         values_proc = lambda{}
@@ -32,7 +32,7 @@ module MDQuery::DSL
         dsm.measure_modifiers.should == {:count=>modify_count_proc}
       end
 
-      it "should create a DimensionSegmentModel for an extracted dimension-value" do
+      it "should build a DimensionSegmentModel for an extracted dimension-value" do
         dimension_model = Object.new
 
         dsl = DimensionSegmentDSL.new(:foo) do
@@ -49,6 +49,96 @@ module MDQuery::DSL
     end
 
     describe DimensionDSL do
+
+      it "should build a DimensionModel with a single segment" do
+        dsl = DimensionDSL.new(:foo) do
+          label :blah
+
+          segment(:bar) do
+            fix_dimension :woot
+          end
+        end
+
+        dm = dsl.send(:build)
+        dm.key.should == :foo
+        dm.label.should == :blah
+        dm.segment_models.count.should == 1
+        dm.segment_models.first.key.should == :bar
+      end
+
+      it "should build a DimensionModel with a list of segments" do
+        dsl = DimensionDSL.new(:foo) do
+
+          segment(:bar) do
+            fix_dimension :woot
+          end
+
+          segment(:baz) do
+            fix_dimension :bloop
+          end
+        end
+
+        dm = dsl.send(:build)
+        dm.key.should == :foo
+        dm.segment_models.count.should == 2
+        dm.segment_models[0].key.should == :bar
+        dm.segment_models[1].key.should == :baz
+      end
+    end
+
+    describe MeasureDSL do
+
+      it "should build a MeasureModel without cast" do
+        dsl = MeasureDSL.new(:foo, "count(*)")
+        mm = dsl.send(:build)
+        mm.key.should == :foo
+        mm.definition.should == "count(*)"
+      end
+
+      it "should build a MeasureModel with cast" do
+        dsl = MeasureDSL.new(:foo, "count(*)", :sym)
+        mm = dsl.send(:build)
+        mm.key.should == :foo
+        mm.definition.should == "count(*)"
+        mm.cast.should == :sym
+      end
+
+    end
+
+    describe DatasetDSL do
+
+      it "should build a DatasetModel with multiple dimensions and measures" do
+        source_scope = Object.new
+
+        dsl = DatasetDSL.new do
+          source source_scope
+
+          dimension :foo do
+            segment :foo_a do
+              fix_dimension :foo_a_value
+            end
+          end
+
+          dimension :bar do
+            segment :bar_a do
+              fix_dimension :bar_a_value
+            end
+          end
+
+          measure :count, "count(*)"
+          measure :avg, "avg(foo)"
+        end
+
+        ds = dsl.send(:build)
+        ds.source_scope.should == source_scope
+        ds.dimension_models.count.should == 2
+        ds.dimension_models[0].key.should == :foo
+        ds.dimension_models[1].key.should == :bar
+        ds.measure_models.count.should == 2
+        ds.measure_models[0].key.should == :count
+        ds.measure_models[1].key.should == :avg
+      end
+
     end
   end
 end

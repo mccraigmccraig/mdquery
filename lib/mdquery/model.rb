@@ -151,7 +151,7 @@ module MDQuery
       attr_reader :cast
 
       def initialize(attrs)
-        MDQuery::Util.assign_attributes(attrs)
+        MDQuery::Util.assign_attributes(self, attrs)
         validate
       end
 
@@ -186,7 +186,7 @@ module MDQuery
       attr_reader :measure_models
 
       def initialize(attrs)
-        MDQuery::Util.assign_attributes(attrs)
+        MDQuery::Util.assign_attributes(self, attrs)
         validate
       end
 
