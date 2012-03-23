@@ -53,6 +53,10 @@ Given the definition of the Dataset, it will query the Sources to extract data p
     end
   end
 
+  data = Q.analyse
+
+  data.datapoint({:time=>'2008', :users=>'all'}, :count) # => 100 # 100 users in 2008
+
 == Contributing to mdquery
 
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet.
