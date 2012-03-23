@@ -12,5 +12,14 @@ describe MDQuery::Util do
 
       MDQuery::Util.assign_attributes(instance, attrs)
     end
+
+    it "should raise an exception if an unknown attribute is passed" do
+      attrs = {:foo=>100, :bar=>"hi"}
+      instance = Object.new
+
+      lambda {
+        MDQuery::Util.assign_attributes(instance, attrs, [:foo])
+      }.should raise_error(/unknown keys: \["bar"\]/)
+    end
   end
 end

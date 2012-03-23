@@ -32,7 +32,9 @@ module MDQuery
       end
 
       def initialize(attrs)
-        MDQuery::Util.assign_attributes(self, attrs)
+        MDQuery::Util.assign_attributes(self,
+                                        attrs,
+                                        [:dimension_model, :key, :fixed_dimension_value, :extract_dimension_query, :narrow_proc, :values_proc, :label_proc, :value_cast, :measure_modifiers])
         validate
       end
 
@@ -106,9 +108,9 @@ module MDQuery
       end
 
       def dimension_values(scope)
-        get_values(scope).map{|v| MDQuery::Dataset::DimensionValue.new(key,
-                                                                       v,
-                                                                       (label_proc || DEFAULT_LABEL_PROC).call(v))}
+        get_values(scope).map{|v| MDQuery::Dataset::DimensionValue.new(:segment_key=>key,
+                                                                       :value=>v,
+                                                                       :label=>(label_proc || DEFAULT_LABEL_PROC).call(v))}
       end
     end
 
@@ -118,7 +120,7 @@ module MDQuery
       attr_reader :segment_models
 
       def initialize(attrs)
-        MDQuery::Util.assign_attributes(self, attrs)
+        MDQuery::Util.assign_attributes(self, attrs, [:key, :label, :segment_models])
         # validate # don't call validate, it's called by the DSL builder
       end
 
@@ -146,7 +148,9 @@ module MDQuery
       end
 
       def dimension(scope)
-        MDQuery::Dataset::Dimension.new(key, label, dimension_values(scope))
+        MDQuery::Dataset::Dimension.new(:key=>key,
+                                        :label=>label,
+                                        :values=>dimension_values(scope))
       end
 
     end
@@ -157,7 +161,7 @@ module MDQuery
       attr_reader :cast
 
       def initialize(attrs)
-        MDQuery::Util.assign_attributes(self, attrs)
+        MDQuery::Util.assign_attributes(self, attrs, [:key, :definition, :cast])
         validate
       end
 
@@ -192,7 +196,7 @@ module MDQuery
       attr_reader :measure_models
 
       def initialize(attrs)
-        MDQuery::Util.assign_attributes(self, attrs)
+        MDQuery::Util.assign_attributes(self, attrs, [:source_scope, :dimension_models, :measure_models])
         validate
       end
 

@@ -4,10 +4,10 @@ require 'mdquery/dataset'
 module MDQuery::Dataset
   describe Dimension do
     it "label_for should lookup labels for values" do
-      d = Dimension.new(:foo, :foo_label,
-                        [DimensionValue.new(:bar, :barbar, "BARBAR"),
-                         DimensionValue.new(:bar, :barbarbar, "BARBARBAR"),
-                         DimensionValue.new(:baz, :bazbaz, "BAZBAZ")])
+      d = Dimension.new(:key=>:foo, :label=>:foo_label,
+                        :values=>[DimensionValue.new(:segment_key=>:bar, :value=>:barbar, :label=>"BARBAR"),
+                         DimensionValue.new(:segment_key=>:bar, :value=>:barbarbar, :label=>"BARBARBAR"),
+                         DimensionValue.new(:segment_key=>:baz, :value=>:bazbaz, :label=>"BAZBAZ")])
 
       d.label_for(:barbar).should == "BARBAR"
       d.label_for(:barbarbar).should == "BARBARBAR"
@@ -15,22 +15,22 @@ module MDQuery::Dataset
     end
 
     it "values_for_segment should extract values belonging to a segment" do
-      vs = [DimensionValue.new(:bar, :barbar, "BARBAR"),
-            DimensionValue.new(:bar, :barbarbar, "BARBARBAR"),
-            DimensionValue.new(:baz, :bazbaz, "BAZBAZ")]
+      vs = [DimensionValue.new(:segment_key=>:bar, :value=>:barbar, :label=>"BARBAR"),
+            DimensionValue.new(:segment_key=>:bar, :value=>:barbarbar, :label=>"BARBARBAR"),
+            DimensionValue.new(:segment_key=>:baz, :value=>:bazbaz, :label=>"BAZBAZ")]
 
-      d = Dimension.new(:foo, :foo_label, vs)
+      d = Dimension.new(:key=>:foo, :label=>:foo_label, :values=>vs)
       d.values_for_segment(:bar).should == vs[0..1]
     end
 
     it "values_for_segments should extract values for given segments in given order" do
-      vs = [DimensionValue.new(:bar, :barbar, "BARBAR"),
-            DimensionValue.new(:bar, :barbarbar, "BARBARBAR"),
-            DimensionValue.new(:baz, :bazbaz, "BAZBAZ"),
-            DimensionValue.new(:foo, :foofoo, "FOOFOO"),
-            DimensionValue.new(:foo, :foofoofoo, "FOOFOOFOO")]
+      vs = [DimensionValue.new(:segment_key=>:bar, :value=>:barbar, :label=>"BARBAR"),
+            DimensionValue.new(:segment_key=>:bar, :value=>:barbarbar, :label=>"BARBARBAR"),
+            DimensionValue.new(:segment_key=>:baz, :value=>:bazbaz, :label=>"BAZBAZ"),
+            DimensionValue.new(:segment_key=>:foo, :value=>:foofoo, :label=>"FOOFOO"),
+            DimensionValue.new(:segment_key=>:foo, :value=>:foofoofoo, :label=>"FOOFOOFOO")]
 
-      d = Dimension.new(:woot, :woot_label, vs)
+      d = Dimension.new(:key=>:woot, :label=>:woot_label, :values=>vs)
       d.values_for_segments([:foo, :bar]).should == vs[3..4] + vs[0..1]
 
     end

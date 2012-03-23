@@ -236,12 +236,12 @@ module MDQuery
         it "should return a Dataset::Dimension" do
           scope = Object.new
           sm1 = Object.new
-          sm1dv1 = MDQuery::Dataset::DimensionValue.new(:s1key, 10, "ten")
-          sm1dv2 = MDQuery::Dataset::DimensionValue.new(:s1key, 20, "twenty")
+          sm1dv1 = MDQuery::Dataset::DimensionValue.new(:segment_key=>:s1key, :value=>10, :label=>"ten")
+          sm1dv2 = MDQuery::Dataset::DimensionValue.new(:segment_key=>:s1key, :value=>20, :label=>"twenty")
           mock(sm1).dimension_values(scope){[sm1dv1, sm1dv2]}
           sm2 = Object.new
-          sm2dv1 = MDQuery::Dataset::DimensionValue.new(:s2key, 1, "one")
-          sm2dv2 = MDQuery::Dataset::DimensionValue.new(:s2key, 2, "two")
+          sm2dv1 = MDQuery::Dataset::DimensionValue.new(:segment_key=>:s2key, :value=>1, :label=>"one")
+          sm2dv2 = MDQuery::Dataset::DimensionValue.new(:segment_key=>:s2key, :value=>2, :label=>"two")
           mock(sm2).dimension_values(scope){[sm2dv1,sm2dv2]}
 
           dm = DimensionModel.new(:key=>:foo, :segment_models=>[sm1, sm2], :label=>"FOO")
@@ -259,9 +259,41 @@ module MDQuery
 
     describe MeasureModel do
       describe "select_string" do
+        it "should return an aliased definition if no region_segment_models modify the definition" do
+          mm = MeasureModel.new(:key=>:count, :definition=>"count(*)")
+
+          sm1 = Object.new
+          mock(sm1).do_modify(:count, "count(*)"){"count(*)"}
+          sm2 = Object.new
+          mock(sm2).do_modify(:count, "count(*)"){"count(*)"}
+
+          mm.select_string([sm1, sm2]).should == "count(*) as count"
+        end
+
+        it "should allow the region_segment_models to modify the definition" do
+          mm = MeasureModel.new(:key=>:count, :definition=>"count(*)")
+
+          sm1 = Object.new
+          mock(sm1).do_modify(:count, anything){|key,mdef| "#{mdef}/12"}
+          sm2 = Object.new
+          mock(sm2).do_modify(:count, anything){|key,mdef| mdef}
+
+          mm.select_string([sm1, sm2]).should == "count(*)/12 as count"
+        end
       end
 
       describe "do_cast" do
+        it "should return the value unchanged if no cast is specified" do
+          mm = MeasureModel.new(:key=>:count, :definition=>"count(*)")
+          mm.do_cast("100").should == "100"
+          mm.do_cast("100").class.should == "100".class
+        end
+
+        it "should cast the value according to the cast specified" do
+          mm = MeasureModel.new(:key=>:count, :definition=>"count(*)", :cast=>:int)
+          mm.do_cast("100").should == 100
+          mm.do_cast("100").class.should == 100.class
+        end
       end
     end
 

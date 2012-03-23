@@ -8,10 +8,8 @@ module MDQuery
       attr_reader :value
       attr_reader :label
 
-      def initialize(segment_key, value, label)
-        @segment_key = segment_key
-        @value = value
-        @label = label
+      def initialize(attrs)
+        MDQuery::Util.assign_attributes(self, attrs, [:segment_key, :value, :label])
         validate
       end
 
@@ -28,10 +26,8 @@ module MDQuery
       attr_reader :label_index
       attr_reader :value_list
 
-      def initialize(key, label, values)
-        @key = key
-        @label = label
-        @values = values
+      def initialize(attrs)
+        MDQuery::Util.assign_attributes(self, attrs, [:key, :label, :values])
         validate
         @value_list = values.map(&:value)
         @label_index = values.reduce({}){|li,dv| li[dv.value] = dv.label ; li}
@@ -67,7 +63,7 @@ module MDQuery
       attr_reader :indexed_data
 
       def initialize(attrs)
-        MDQuery::Util.assign_attributes(self, attrs)
+        MDQuery::Util.assign_attributes(self, attrs, [:model, :dimensions, :measures, :data])
         validate
         index
       end
