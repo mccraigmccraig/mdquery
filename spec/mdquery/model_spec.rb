@@ -399,6 +399,48 @@ module MDQuery
       end
 
       describe "construct_query" do
+        it "should narrow the scope according to each segment in the region, select dimension and measure values, and group by dimensions" do
+          dim0sm0 = Object.new
+          dim0 = DimensionModel.new(:key=>:foo, :segment_models=>[dim0sm0])
+          dim1sm0 = Object.new
+          dim1 = DimensionModel.new(:key=>:bar, :segment_models=>[dim1sm0])
+          mm1 = MeasureModel.new(:key=>:count, :definition=>"count(*)")
+
+          dm = DatasetModel.new(:source=>Object.new,
+                                :dimension_models=>[dim0, dim1],
+                                :measure_models=>[mm1])
+
+          scope = Object.new
+          region_segment_models = [dim0sm0, dim1sm0]
+          measure_models = [mm1]
+
+          # the narrowing
+          scope_n1 = Object.new
+          mock(dim0sm0).do_narrow(scope){scope_n1}
+          scope_n2 = Object.new
+          mock(dim1sm0).do_narrow(scope_n1){scope_n2}
+
+          # dimension_select_strings
+          mock(dim0sm0).select_string{"foofoo as foo"}
+          mock(dim1sm0).select_string{"barbar as bar"}
+
+
+          # measure_select_strings
+          mock(mm1).select_string([dim0sm0, dim1sm0]){"count(*) as count"}
+
+          select_string = "foofoo as foo,barbar as bar,count(*) as count"
+
+          # group_string
+          mock(dim0sm0).group_by_column{"foo"}
+          mock(dim1sm0).group_by_column{"bar"}
+          group_string = "foo,bar"
+
+          scope_n3 = Object.new
+          query = Object.new
+          mock(scope_n2).select(select_string){scope_n3}.mock!.group(group_string){query}
+
+          dm.construct_query(scope, region_segment_models, measure_models).should == query
+        end
       end
 
       describe "extract" do
