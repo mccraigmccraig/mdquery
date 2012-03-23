@@ -30,7 +30,6 @@ module MDQuery
 
       def initialize(attrs)
         MDQuery::Util.assign_attributes(self, attrs)
-        $stderr << inspect << "\n\n\n"
         validate
       end
 
@@ -140,7 +139,7 @@ module MDQuery
       end
 
       def dimension(scope)
-        MDQuery::Dimension.new(key, label_str, dimension_values(scope))
+        MDQuery::Dataset::Dimension.new(key, label_str, dimension_values(scope))
       end
 
     end
@@ -266,10 +265,10 @@ module MDQuery
 
         ds = dimension_models.reduce({}){|h,dm| h[dm.key] = dm.dimension(source_scope) ; h}
 
-        MDQuery::Dataset.new(:definition=>self,
-                             :dimensions=>ds,
-                             :measures=>measure_models.map(&:key),
-                             :data=>data)
+        MDQuery::Dataset::Dataset.new(:definition=>self,
+                                      :dimensions=>ds,
+                                      :measures=>measure_models.map(&:key),
+                                      :data=>data)
       end
     end
   end
