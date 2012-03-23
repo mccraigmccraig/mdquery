@@ -202,9 +202,67 @@ module MDQuery
     end
 
     describe DimensionModel do
+      describe "index_list" do
+        it "should return a list of lists each with a segment_model index when given a nil prefix" do
+          dm = DimensionModel.new(:key=>:foo, :segment_models=>[Object.new, Object.new])
+          dm.index_list(nil).should == [[0],[1]]
+        end
+
+        it "should suffix each segment_model index to each prefix when given a non-nil prefix" do
+          dm = DimensionModel.new(:key=>:foo, :segment_models=>[Object.new, Object.new])
+          dm.index_list([[0],[1]]).should == [[0,0],[1,0],[0,1],[1,1]]
+        end
+      end
+
+      describe "dimension_values" do
+        it "should concatenate values from each of the segment_models" do
+          scope = Object.new
+          sm1 = Object.new
+          sm1dv1 = Object.new
+          sm1dv2 = Object.new
+          mock(sm1).dimension_values(scope){[sm1dv1, sm1dv2]}
+          sm2 = Object.new
+          sm2dv1 = Object.new
+          sm2dv2 = Object.new
+          mock(sm2).dimension_values(scope){[sm2dv1,sm2dv2]}
+
+          dm = DimensionModel.new(:key=>:foo, :segment_models=>[sm1, sm2])
+
+          dm.dimension_values(scope).should == [sm1dv1,sm1dv2,sm2dv1,sm2dv2]
+        end
+      end
+
+      describe "dimension" do
+        it "should return a Dataset::Dimension" do
+          scope = Object.new
+          sm1 = Object.new
+          sm1dv1 = MDQuery::Dataset::DimensionValue.new(:s1key, 10, "ten")
+          sm1dv2 = MDQuery::Dataset::DimensionValue.new(:s1key, 20, "twenty")
+          mock(sm1).dimension_values(scope){[sm1dv1, sm1dv2]}
+          sm2 = Object.new
+          sm2dv1 = MDQuery::Dataset::DimensionValue.new(:s2key, 1, "one")
+          sm2dv2 = MDQuery::Dataset::DimensionValue.new(:s2key, 2, "two")
+          mock(sm2).dimension_values(scope){[sm2dv1,sm2dv2]}
+
+          dm = DimensionModel.new(:key=>:foo, :segment_models=>[sm1, sm2], :label=>"FOO")
+
+          d = dm.dimension(scope)
+          d.key.should == :foo
+          d.label.should == "FOO"
+          d.values.should == [sm1dv1,sm1dv2,sm2dv1,sm2dv2]
+          d.values_for_segment(:s1key).should == [sm1dv1, sm1dv2]
+          d.values_for_segment(:s2key).should == [sm2dv1, sm2dv2]
+          d.values_for_segments([:s2key, :s1key]).should == [sm2dv1, sm2dv2, sm1dv1, sm1dv2]
+        end
+      end
     end
 
     describe MeasureModel do
+      describe "select_string" do
+      end
+
+      describe "do_cast" do
+      end
     end
 
     describe DatasetModel do

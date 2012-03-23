@@ -131,8 +131,12 @@ module MDQuery
         "#<DimensionDefinition: key=#{key.inspect}, segment_models=#{segment_models.inspect}>"
       end
 
+      # for each prefix emit one item for the index of each segment_model. e.g. if
+      # we have 2 segment_models and are give prefixes [[0],[1]] then the result is
+      # [[0,0],[0,1],[1,0],[1,1]]. used in the calculation of the cross-join of segment indexes
+      # across all dimensions
       def index_list(prefixes=nil)
-        (0...segments_models.length).reduce([]){|l, i| l + (prefixes||[[]]).map{|prefix| prefix.clone << i}}
+        (0...segment_models.length).reduce([]){|l, i| l + (prefixes||[[]]).map{|prefix| prefix.clone << i}}
       end
 
       def dimension_values(scope)
@@ -142,7 +146,7 @@ module MDQuery
       end
 
       def dimension(scope)
-        MDQuery::Dataset::Dimension.new(key, label_str, dimension_values(scope))
+        MDQuery::Dataset::Dimension.new(key, label, dimension_values(scope))
       end
 
     end
@@ -203,7 +207,7 @@ module MDQuery
       end
 
       # a list of tuples of dimension-segment indexes, each tuple specifying
-      # one segment for each dimension
+      # one segment for each dimension. it is the cross-join of the dimension-segment indexes
       def region_segment_model_indexes
         dimension_models.reduce(nil){|indexes, dimension_model| dimension_model.index_list(indexes)}
       end
@@ -268,7 +272,7 @@ module MDQuery
 
         ds = dimension_models.reduce({}){|h,dm| h[dm.key] = dm.dimension(source_scope) ; h}
 
-        MDQuery::Dataset::Dataset.new(:definition=>self,
+        MDQuery::Dataset::Dataset.new(:model=>self,
                                       :dimensions=>ds,
                                       :measures=>measure_models.map(&:key),
                                       :data=>data)
