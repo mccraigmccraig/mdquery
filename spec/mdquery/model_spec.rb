@@ -444,9 +444,74 @@ module MDQuery
       end
 
       describe "extract" do
+        it "should extract row records into hashes keyed by dimension-values and measure-keys" do
+          dim0sm0 = Object.new
+          dim0 = DimensionModel.new(:key=>:foo, :segment_models=>[dim0sm0])
+          dim1sm0 = Object.new
+          dim1 = DimensionModel.new(:key=>:bar, :segment_models=>[dim1sm0])
+          mm1 = MeasureModel.new(:key=>:count, :definition=>"count(*)", :cast=>:int)
+
+          dm = DatasetModel.new(:source=>Object.new,
+                                :dimension_models=>[dim0, dim1],
+                                :measure_models=>[mm1])
+
+          stub(dim0sm0).dimension{dim0}
+          stub(dim0sm0).do_cast(anything){|value| value}
+          stub(dim1sm0).dimension{dim1}
+          stub(dim1sm0).do_cast(anything){|value| value}
+
+          # ActiveRecord methods are called on row instances
+          row1 = Object.new
+          mock(row1).foo{"foo1"}
+          mock(row1).bar{"bar1"}
+          mock(row1).count{"10"}
+          row2 = Object.new
+          mock(row2).foo{"foo2"}
+          mock(row2).bar{"bar2"}
+          mock(row2).count{"20"}
+
+          dm.extract([row1,row2], [dim0sm0, dim1sm0], [mm1]).should == [{:foo=>"foo1", :bar=>"bar1", :count=>10},
+                                                                        {:foo=>"foo2", :bar=>"bar2", :count=>20}]
+        end
       end
 
       describe "analyse" do
+        it "should do a query for each region and put the results in a dataset" do
+          dim0sm0 = Object.new
+          dim0 = DimensionModel.new(:key=>:foo, :segment_models=>[dim0sm0])
+          dim1sm0 = Object.new
+          dim1 = DimensionModel.new(:key=>:bar, :segment_models=>[dim1sm0])
+          mm1 = MeasureModel.new(:key=>:count, :definition=>"count(*)", :cast=>:int)
+
+          dm = DatasetModel.new(:source=>Object.new,
+                                :dimension_models=>[dim0, dim1],
+                                :measure_models=>[mm1])
+
+          mock(dm).with_regions do |proc|
+            proc.call([dim0sm0,dim1sm0])
+          end
+
+          query = Object.new
+          mock(dm).construct_query(dm.source, [dim0sm0, dim1sm0], [mm1]){query}
+          records = Object.new
+          mock(query).all{records}
+          mock(dm).extract(records, [dim0sm0, dim1sm0], [mm1]){[{:foo=>"foo1", :bar=>"bar1", :count=>10},
+                                                                {:foo=>"foo2", :bar=>"bar2", :count=>20}]}
+
+          ddim0 = Object.new
+          mock(dim0).dimension(dm.source){ddim0}
+          ddim1 = Object.new
+          mock(dim1).dimension(dm.source){ddim1}
+
+          dataset = dm.analyse
+
+          dataset.model.should == dm
+          dataset.dimensions.should == {:foo=>ddim0, :bar=>ddim1}
+          dataset.measures.should == [:count]
+          dataset.data.should == [{:foo=>"foo1", :bar=>"bar1", :count=>10},
+                                  {:foo=>"foo2", :bar=>"bar2", :count=>20}]
+          dataset.datapoint({:foo=>"foo1", :bar=>"bar1"}, :count).should == 10
+        end
       end
     end
   end

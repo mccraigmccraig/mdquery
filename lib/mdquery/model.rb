@@ -269,7 +269,7 @@ module MDQuery
         data = []
 
         with_regions do |region_segment_models|
-          q = construct_query(source, region_segment_models, measures)
+          q = construct_query(source, region_segment_models, measure_models)
           points = extract(q.all, region_segment_models, measure_models)
           data += points
         end
