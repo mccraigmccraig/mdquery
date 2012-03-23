@@ -1,5 +1,7 @@
 = mdquery
 
+{<img src="https://secure.travis-ci.org/mccraigmccraig/mdquery.png" />}[http://travis-ci.org/mccraigmccraig/mdquery]
+
 Defines a DSL for specifying and executing segmented multi-dimensional queries on your ActiveRecord-3 models
 
 == Installation
