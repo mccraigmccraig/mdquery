@@ -1,5 +1,8 @@
+require 'active_record'
 require 'mdquery/dataset'
 require 'mdquery/util'
+require 'date'
+require 'time'
 
 module MDQuery
   module Model
@@ -8,9 +11,9 @@ module MDQuery
       :sym => lambda{|v| v.to_sym},
       :int => lambda{|v| v.to_i},
       :float => lambda{|v| v.to_f},
-      :date => lambda{|v| v.to_date},
-      :datetime => lambda{|v| v.do_datetime},
-      :time => lambda{|v| v.to_time}
+      :date => lambda{|v| Date.parse(v)},
+      :datetime => lambda{|v| DateTime.parse(v)},
+      :time => lambda{|v| Time.parse(v)}
     }
 
     class DimensionSegmentModel
@@ -38,7 +41,7 @@ module MDQuery
         raise "no key!" if !key
         raise "only one of fix_dimension and extract_dimension can be given" if fixed_dimension_value && extract_dimension_query
         raise "one of fix_dimension or extract_dimension must be given" if !fixed_dimension_value && !extract_dimension_query
-        measure_modifiers ||= {}
+        @measure_modifiers ||= {}
       end
 
       def inspect
@@ -103,9 +106,9 @@ module MDQuery
       end
 
       def dimension_values(scope)
-        get_values(scope).map{|v| MDQuery::DimensionValue.new(key,
-                                                              v,
-                                                              (label_proc || DEFAULT_LABEL_PROC).call(v))}
+        get_values(scope).map{|v| MDQuery::Dataset::DimensionValue.new(key,
+                                                                       v,
+                                                                       (label_proc || DEFAULT_LABEL_PROC).call(v))}
       end
     end
 
