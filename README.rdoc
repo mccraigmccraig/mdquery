@@ -10,7 +10,13 @@ Defines a DSL for specifying and executing segmented multi-dimensional queries o
 
 == Usage
 
-A Dataset defines a Source and some Dimensions and some Measures. Measures are aggregate functions to be computed. Each Dimension consists of 1 or more Segments, and each Segment either fixes a value for the Dimension or extracts values from the datasource. Each Segment defines an ActiveRecord scope which will narrow the datasource according to the Dimension value or values for the Segment. Given the definition of the Dataset, it will query the datasource to extract data points, each of which will have a value for each Dimension and a value for each Measure
+A Dataset consists of some Measures over some Dimensions of a Source
+
+* Measures are SQL aggregate functions to be computed, e.g. "count(*)" or "avg(age)"
+* Each Dimension consists of 1 or more Segments, and each Segment either fixes a value for the Dimension or extracts values from the Source. Each Segment may narrow the Source scope according to the Dimension value or value-range for the Segment
+* A Source is an ActiveRecord-3 Scope
+
+Given the definition of the Dataset, it will query the Sources to extract data points, each of which will have a value for each Dimension and a value for each Measure
 
   require 'mdquery'
 
