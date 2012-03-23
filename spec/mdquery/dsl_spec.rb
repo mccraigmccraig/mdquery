@@ -108,10 +108,10 @@ module MDQuery::DSL
     describe DatasetDSL do
 
       it "should build a DatasetModel with multiple dimensions and measures" do
-        source_scope = Object.new
+        source = Object.new
 
         dsl = DatasetDSL.new do
-          source source_scope
+          source source
 
           dimension :foo do
             segment :foo_a do
@@ -130,7 +130,7 @@ module MDQuery::DSL
         end
 
         ds = dsl.send(:build)
-        ds.source_scope.should == source_scope
+        ds.source.should == source
         ds.dimension_models.count.should == 2
         ds.dimension_models[0].key.should == :foo
         ds.dimension_models[1].key.should == :bar

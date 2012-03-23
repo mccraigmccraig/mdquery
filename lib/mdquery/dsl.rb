@@ -135,8 +135,8 @@ module MDQuery
       # define the datasource for the Dataset
       # * +scope+ an ActiveRecord scope, used as the basis for all region queries
       def source(scope)
-        raise "source already set" if @source_scope
-        @source_scope = scope
+        raise "source already set" if @source
+        @source = scope
       end
 
       # define a Dimension
@@ -166,7 +166,7 @@ module MDQuery
       def build
         ds = @dimensions.map{|d| d.send(:build)}
         ms = @measures.map{|m| m.send(:build)}
-        MDQuery::Model::DatasetModel.new(:source_scope=>@source_scope,
+        MDQuery::Model::DatasetModel.new(:source=>@source,
                                          :dimension_models=>ds,
                                          :measure_models=>ms)
       end

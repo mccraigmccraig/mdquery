@@ -1,5 +1,6 @@
 require File.expand_path('../../spec_helper', __FILE__)
 require 'mdquery/model'
+require 'set'
 
 module MDQuery
   module Model
@@ -298,6 +299,113 @@ module MDQuery
     end
 
     describe DatasetModel do
+      describe "region_segment_model_indexes" do
+
+        it "should produce the cross-producton of dimension segment indexes for one dimension" do
+          dim1 = DimensionModel.new(:key=>:foo, :segment_models=>[Object.new, Object.new])
+          mm1 = MeasureModel.new(:key=>:count, :definition=>"count(*)")
+
+          dm = DatasetModel.new(:source=>Object.new,
+                                :dimension_models=>[dim1],
+                                :measure_models=>[mm1])
+
+          dm.region_segment_model_indexes.to_set.should == [[0],[1]].to_set
+        end
+
+        it "should produce the cross-product of dimension segment indexes for two dimensions" do
+          dim1 = DimensionModel.new(:key=>:foo, :segment_models=>[Object.new, Object.new])
+          dim2 = DimensionModel.new(:key=>:foo, :segment_models=>[Object.new, Object.new, Object.new])
+          mm1 = MeasureModel.new(:key=>:count, :definition=>"count(*)")
+
+          dm = DatasetModel.new(:source=>Object.new,
+                                :dimension_models=>[dim1, dim2],
+                                :measure_models=>[mm1])
+
+          dm.region_segment_model_indexes.to_set.should == [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2]].to_set
+        end
+
+        it "should produce the cross-product of dimension segment indexes for 3 dimensions" do
+          dim1 = DimensionModel.new(:key=>:foo, :segment_models=>[Object.new, Object.new])
+          dim2 = DimensionModel.new(:key=>:foo, :segment_models=>[Object.new, Object.new, Object.new])
+          dim3 = DimensionModel.new(:key=>:foo, :segment_models=>[Object.new, Object.new])
+          mm1 = MeasureModel.new(:key=>:count, :definition=>"count(*)")
+
+          dm = DatasetModel.new(:source=>Object.new,
+                                :dimension_models=>[dim1, dim2, dim3],
+                                :measure_models=>[mm1])
+
+          dm.region_segment_model_indexes.to_set.should == [[0,0,0],[0,0,1],[0,1,0],[0,1,1],[0,2,0],[0,2,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1],[1,2,0],[1,2,1]].to_set
+        end
+      end
+
+      describe "all_dimension_segment_models" do
+        it "should return a list lists of dimension segments" do
+          dim1sm1 = Object.new
+          dim1sm2 = Object.new
+          dim1 = DimensionModel.new(:key=>:foo, :segment_models=>[dim1sm1, dim1sm2])
+          dim2sm1 = Object.new
+          dim2sm2 = Object.new
+          dim2sm3 = Object.new
+          dim2 = DimensionModel.new(:key=>:foo, :segment_models=>[dim2sm1, dim2sm2, dim2sm3])
+          mm1 = MeasureModel.new(:key=>:count, :definition=>"count(*)")
+
+          dm = DatasetModel.new(:source=>Object.new,
+                                :dimension_models=>[dim1, dim2],
+                                :measure_models=>[mm1])
+          dm.all_dimension_segment_models.should == [[dim1sm1, dim1sm2], [dim2sm1, dim2sm2, dim2sm3]]
+        end
+      end
+
+      describe "region_segment_models" do
+        it "should produce a list of dimension segment models corresponding to the supplied indexes" do
+          dim0sm0 = Object.new
+          dim0sm1 = Object.new
+          dim0 = DimensionModel.new(:key=>:foo, :segment_models=>[dim0sm0, dim0sm1])
+          dim1sm0 = Object.new
+          dim1sm1 = Object.new
+          dim1sm2 = Object.new
+          dim1 = DimensionModel.new(:key=>:foo, :segment_models=>[dim1sm0, dim1sm1, dim1sm2])
+          mm1 = MeasureModel.new(:key=>:count, :definition=>"count(*)")
+
+          dm = DatasetModel.new(:source=>Object.new,
+                                :dimension_models=>[dim0, dim1],
+                                :measure_models=>[mm1])
+          dm.region_segment_models([0,1]).should == [dim0sm0, dim1sm1]
+          dm.region_segment_models([1,2]).should == [dim0sm1, dim1sm2]
+        end
+      end
+
+      describe "with_regions" do
+        it "should iterate of all regions calling the proc with the region segment models" do
+          dim0sm0 = Object.new
+          dim0sm1 = Object.new
+          dim0 = DimensionModel.new(:key=>:foo, :segment_models=>[dim0sm0, dim0sm1])
+          dim1sm0 = Object.new
+          dim1sm1 = Object.new
+          dim1sm2 = Object.new
+          dim1 = DimensionModel.new(:key=>:foo, :segment_models=>[dim1sm0, dim1sm1, dim1sm2])
+          mm1 = MeasureModel.new(:key=>:count, :definition=>"count(*)")
+
+          dm = DatasetModel.new(:source=>Object.new,
+                                :dimension_models=>[dim0, dim1],
+                                :measure_models=>[mm1])
+
+          all_region_segment_models = [[dim0sm0,dim1sm0],[dim0sm0,dim1sm1],[dim0sm0,dim1sm2],[dim0sm1,dim1sm0],[dim0sm1,dim1sm1],[dim0sm1,dim1sm2]].to_set
+          dm.with_regions do |region_segment_models|
+            all_region_segment_models.delete(region_segment_models)
+          end
+          all_region_segment_models.empty?.should == true
+        end
+      end
+
+      describe "construct_query" do
+      end
+
+      describe "extract" do
+      end
+
+      describe "analyse" do
+      end
     end
   end
 end

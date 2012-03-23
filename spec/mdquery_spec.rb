@@ -3,10 +3,10 @@ require 'mdquery'
 
 describe "MDQuery" do
   it "should use the DSL to define a Dataset" do
-    source_scope = Object.new
+    source = Object.new
 
     ds = MDQuery.dataset do
-      source source_scope
+      source source
 
       dimension :foo do
         segment :foo_a do
@@ -24,7 +24,7 @@ describe "MDQuery" do
       measure :avg, "avg(foo)"
     end
 
-    ds.source_scope.should == source_scope
+    ds.source.should == source
     ds.dimension_models.count.should == 2
     ds.dimension_models[0].key.should == :foo
     ds.dimension_models[1].key.should == :bar

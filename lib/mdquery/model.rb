@@ -191,17 +191,17 @@ module MDQuery
     end
 
     class DatasetModel
-      attr_reader :source_scope
+      attr_reader :source
       attr_reader :dimension_models
       attr_reader :measure_models
 
       def initialize(attrs)
-        MDQuery::Util.assign_attributes(self, attrs, [:source_scope, :dimension_models, :measure_models])
+        MDQuery::Util.assign_attributes(self, attrs, [:source, :dimension_models, :measure_models])
         validate
       end
 
       def validate
-        raise "no source scope!" if !source_scope
+        raise "no source!" if !source
         raise "no dimension_models!" if !dimension_models || dimension_models.empty?
         raise "no measure_models!" if !measure_models || measure_models.empty?
       end
@@ -269,12 +269,12 @@ module MDQuery
         data = []
 
         with_regions do |region_segment_models|
-          q = construct_query(source_scope, region_segment_models, measures)
+          q = construct_query(source, region_segment_models, measures)
           points = extract(q.all, region_segment_models, measure_models)
           data += points
         end
 
-        ds = dimension_models.reduce({}){|h,dm| h[dm.key] = dm.dimension(source_scope) ; h}
+        ds = dimension_models.reduce({}){|h,dm| h[dm.key] = dm.dimension(source) ; h}
 
         MDQuery::Dataset::Dataset.new(:model=>self,
                                       :dimensions=>ds,
