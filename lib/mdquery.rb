@@ -1,3 +1,4 @@
+$: << File.expand_path('..', __FILE__) if !$:.include?(File.expand_path('..', __FILE__))
 require 'mdquery/dsl'
 
 # a DSL for specifying analytic queries

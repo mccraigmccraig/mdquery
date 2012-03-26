@@ -186,20 +186,6 @@ module MDQuery
           dsm.labels([:foo]).should == {:foo=>"FOO"}
         end
       end
-
-      describe "dimension_values" do
-        it "should return a list of DimensionValue objects for each value of get_values(scope)" do
-          scope = Object.new
-
-          dsm = create
-          mock(dsm).get_values(scope){[1,2,3]}
-
-          dvs = dsm.dimension_values(scope)
-          dvs.map(&:segment_key).should == [:foo, :foo, :foo]
-          dvs.map(&:value).should == [1,2,3]
-          dvs.map(&:label).should == ["1", "2", "3"]
-        end
-      end
     end
 
     describe DimensionModel do
@@ -212,48 +198,6 @@ module MDQuery
         it "should suffix each segment_model index to each prefix when given a non-nil prefix" do
           dm = DimensionModel.new(:key=>:foo, :segment_models=>[Object.new, Object.new])
           dm.index_list([[0],[1]]).should == [[0,0],[1,0],[0,1],[1,1]]
-        end
-      end
-
-      describe "dimension_values" do
-        it "should concatenate values from each of the segment_models" do
-          scope = Object.new
-          sm1 = Object.new
-          sm1dv1 = Object.new
-          sm1dv2 = Object.new
-          mock(sm1).dimension_values(scope){[sm1dv1, sm1dv2]}
-          sm2 = Object.new
-          sm2dv1 = Object.new
-          sm2dv2 = Object.new
-          mock(sm2).dimension_values(scope){[sm2dv1,sm2dv2]}
-
-          dm = DimensionModel.new(:key=>:foo, :segment_models=>[sm1, sm2])
-
-          dm.dimension_values(scope).should == [sm1dv1,sm1dv2,sm2dv1,sm2dv2]
-        end
-      end
-
-      describe "dimension" do
-        it "should return a Dataset::Dimension" do
-          scope = Object.new
-          sm1 = Object.new
-          sm1dv1 = MDQuery::Dataset::DimensionValue.new(:segment_key=>:s1key, :value=>10, :label=>"ten")
-          sm1dv2 = MDQuery::Dataset::DimensionValue.new(:segment_key=>:s1key, :value=>20, :label=>"twenty")
-          mock(sm1).dimension_values(scope){[sm1dv1, sm1dv2]}
-          sm2 = Object.new
-          sm2dv1 = MDQuery::Dataset::DimensionValue.new(:segment_key=>:s2key, :value=>1, :label=>"one")
-          sm2dv2 = MDQuery::Dataset::DimensionValue.new(:segment_key=>:s2key, :value=>2, :label=>"two")
-          mock(sm2).dimension_values(scope){[sm2dv1,sm2dv2]}
-
-          dm = DimensionModel.new(:key=>:foo, :segment_models=>[sm1, sm2], :label=>"FOO")
-
-          d = dm.dimension(scope)
-          d.key.should == :foo
-          d.label.should == "FOO"
-          d.values.should == [sm1dv1,sm1dv2,sm2dv1,sm2dv2]
-          d.values_for_segment(:s1key).should == [sm1dv1, sm1dv2]
-          d.values_for_segment(:s2key).should == [sm2dv1, sm2dv2]
-          d.values_for_segments([:s2key, :s1key]).should == [sm2dv1, sm2dv2, sm1dv1, sm1dv2]
         end
       end
     end
@@ -475,7 +419,8 @@ module MDQuery
         end
       end
 
-      describe "analyse" do
+
+      describe "do_queries" do
         it "should do a query for each region and put the results in a dataset" do
           dim0sm0 = Object.new
           dim0 = DimensionModel.new(:key=>:foo, :segment_models=>[dim0sm0])
@@ -498,19 +443,29 @@ module MDQuery
           mock(dm).extract(records, [dim0sm0, dim1sm0], [mm1]){[{:foo=>"foo1", :bar=>"bar1", :count=>10},
                                                                 {:foo=>"foo2", :bar=>"bar2", :count=>20}]}
 
-          ddim0 = Object.new
-          mock(dim0).dimension(dm.source){ddim0}
-          ddim1 = Object.new
-          mock(dim1).dimension(dm.source){ddim1}
+          data = dm.do_queries
+          data.should == [{:foo=>"foo1", :bar=>"bar1", :count=>10},
+                          {:foo=>"foo2", :bar=>"bar2", :count=>20}]
+        end
+      end
 
-          dataset = dm.analyse
+      describe "analyse" do
+        it "should do_queries and use the result to constract a Dataset" do
+          dim0sm0 = Object.new
+          dim0 = DimensionModel.new(:key=>:foo, :segment_models=>[dim0sm0])
+          mm1 = MeasureModel.new(:key=>:count, :definition=>"count(*)", :cast=>:int)
 
-          dataset.model.should == dm
-          dataset.dimensions.should == {:foo=>ddim0, :bar=>ddim1}
-          dataset.measures.should == [:count]
-          dataset.data.should == [{:foo=>"foo1", :bar=>"bar1", :count=>10},
-                                  {:foo=>"foo2", :bar=>"bar2", :count=>20}]
-          dataset.datapoint({:foo=>"foo1", :bar=>"bar1"}, :count).should == 10
+          dm = DatasetModel.new(:source=>Object.new,
+                                :dimension_models=>[dim0],
+                                :measure_models => [mm1])
+
+          dataset = Object.new
+          mock(dm).do_queries{dataset}
+
+          mock(MDQuery::Dataset::Dataset).new(dm, dataset)
+
+          dm.analyse
+
         end
       end
     end

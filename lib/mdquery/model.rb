@@ -99,18 +99,12 @@ module MDQuery
         end
       end
 
-      # map of values to names
+      # map of values to labels
       def labels(values)
         values.reduce({}) do |labels,value|
           labels[value] = (label_proc || DEFAULT_LABEL_PROC).call(value)
           labels
         end
-      end
-
-      def dimension_values(scope)
-        get_values(scope).map{|v| MDQuery::Dataset::DimensionValue.new(:segment_key=>key,
-                                                                       :value=>v,
-                                                                       :label=>(label_proc || DEFAULT_LABEL_PROC).call(v))}
       end
     end
 
@@ -140,19 +134,6 @@ module MDQuery
       def index_list(prefixes=nil)
         (0...segment_models.length).reduce([]){|l, i| l + (prefixes||[[]]).map{|prefix| prefix.clone << i}}
       end
-
-      def dimension_values(scope)
-        segment_models.map do |s|
-          s.dimension_values(scope)
-        end.reduce(&:concat)
-      end
-
-      def dimension(scope)
-        MDQuery::Dataset::Dimension.new(:key=>key,
-                                        :label=>label,
-                                        :values=>dimension_values(scope))
-      end
-
     end
 
     class MeasureModel
@@ -237,6 +218,7 @@ module MDQuery
         end
       end
 
+      # construct a query for a region
       def construct_query(scope, region_segment_models, measure_models)
         narrowed_scope = region_segment_models.reduce(scope){|scope, ds| ds.do_narrow(scope)}
 
@@ -251,6 +233,7 @@ module MDQuery
         narrowed_scope.select(select_string).group(group_string)
       end
 
+      # extract data points from a list of ActiveRecord models
       def extract(rows, region_segment_models, measure_models)
         rows.map do |row|
           dimension_values = region_segment_models.map do |ds|
@@ -264,8 +247,8 @@ module MDQuery
         end
       end
 
-
-      def analyse
+      # run the queries defined by the DatasetModel
+      def do_queries
         data = []
 
         with_regions do |region_segment_models|
@@ -274,12 +257,12 @@ module MDQuery
           data += points
         end
 
-        ds = dimension_models.reduce({}){|h,dm| h[dm.key] = dm.dimension(source) ; h}
+        data
+      end
 
-        MDQuery::Dataset::Dataset.new(:model=>self,
-                                      :dimensions=>ds,
-                                      :measures=>measure_models.map(&:key),
-                                      :data=>data)
+      # run the queries and put the results in a Dataset
+      def analyse
+        MDQuery::Dataset::Dataset.new(self, do_queries)
       end
     end
   end
