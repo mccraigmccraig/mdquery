@@ -39,6 +39,14 @@ module MDQuery::Dataset
         dv0.value.should == :foo
         dv0.label.should == "foo"
       end
+
+      it "should retrieve a DimensionValue from the segment with the deref operator" do
+        ds = build
+        dv0 = ds[:foo]
+        dv0.dimension_segment.should == ds
+        dv0.value.should == :foo
+        dv0.label.should == "foo"
+      end
     end
 
     describe "label_for" do
@@ -102,6 +110,12 @@ module MDQuery::Dataset
         d = build
         d.segment(:segment0_key).should == @segment0
         d.segment(:segment1_key).should == @segment1
+      end
+
+      it "should retrieve a segment by key with deref operator" do
+        d = build
+        d[:segment0_key].should == @segment0
+        d[:segment1_key].should == @segment1
       end
     end
 

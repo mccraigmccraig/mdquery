@@ -24,6 +24,10 @@ module MDQuery
         raise "no dimension_segment!" if !dimension_segment
         raise "no value!" if !value
       end
+
+      def inspect
+        "#<DimensionValue: value=#{value.inspect}, label=#{label.inspect}>"
+      end
     end
 
     class DimensionSegment
@@ -58,8 +62,16 @@ module MDQuery
         raise "no values!" if !values
       end
 
+      def inspect
+        "#<DimensionSegment: key=#{key.inspect}, dimension_values=#{dimension_values.inspect}>"
+      end
+
       def dimension_value_for(value)
         @dimension_value_index[value]
+      end
+
+      def [](value)
+        dimension_value_for(value)
       end
 
       def label_for(value)
@@ -98,9 +110,17 @@ module MDQuery
         raise "no segments!" if !segments || segments.empty?
       end
 
+      def inspect
+        "#<Dimension: key=#{key.inspect}, label=#{label.inspect}, segments=#{segments.inspect}>"
+      end
+
       # lookup a segment by +key+
       def segment(key)
         @segment_index[key]
+      end
+
+      def [](key)
+        segment(key)
       end
 
       # return an ordered list of values for 0 or more segments.
@@ -142,6 +162,10 @@ module MDQuery
         raise "no key!" if !key
         raise "no definition!" if !definition || definition=~/^\s*$/
       end
+
+      def inspect
+        "#<Measure: key=#{key.inspect}, definition=#{definition.inspect}>"
+      end
     end
 
     class Dataset
@@ -168,6 +192,10 @@ module MDQuery
         raise "no data!" if !data
         raise "no dimensions!" if !dimensions || dimensions.empty?
         raise "no measures!" if !measures || measures.empty?
+      end
+
+      def inspect
+        "#<Dataset: dimensions=#{dimensions.inspect}, measures=#{measures.inspect}, data=#{data.inspect}>"
       end
 
       # retrieve a datapoint given a hash of {dimension_key=>dimension_values}
