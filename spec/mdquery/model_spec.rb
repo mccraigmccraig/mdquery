@@ -455,9 +455,9 @@ module MDQuery
                                 :dimension_models=>[dim0, dim1],
                                 :measure_models=>[mm1])
 
-          stub(dim0sm0).dimension{dim0}
+          stub(dim0sm0).dimension_model{dim0}
           stub(dim0sm0).do_cast(anything){|value| value}
-          stub(dim1sm0).dimension{dim1}
+          stub(dim1sm0).dimension_model{dim1}
           stub(dim1sm0).do_cast(anything){|value| value}
 
           # ActiveRecord methods are called on row instances

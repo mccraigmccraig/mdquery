@@ -254,7 +254,7 @@ module MDQuery
       def extract(rows, region_segment_models, measure_models)
         rows.map do |row|
           dimension_values = region_segment_models.map do |ds|
-            {ds.dimension.key => ds.do_cast(row.send(ds.dimension.key))}
+            {ds.dimension_model.key => ds.do_cast(row.send(ds.dimension_model.key))}
           end
           measure_values = measure_models.map do |m|
             {m.key => m.do_cast(row.send(m.key))}
