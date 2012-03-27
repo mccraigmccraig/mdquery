@@ -163,8 +163,12 @@ module MDQuery
         if segment_keys && !segment_keys.empty?
           segment_keys.map{|sk| segment(sk)}.map(&:dimension_values).reduce(&:+)
         else
-          segments.map(&:dimension_values).reduce(&:+)
+          dimension_values
         end
+      end
+
+      def dimension_values
+        segments.map(&:dimension_values).reduce(&:+)
       end
 
       # the DimensionValue describing +value+ or nil

@@ -143,6 +143,13 @@ module MDQuery::Dataset
       end
     end
 
+    describe "dimension_values" do
+      it "should return a list of DimensionValues from all segments" do
+        d = build
+        d.dimension_values.should == [@s0v0, @s0v1, @s1v0, @s1v1]
+      end
+    end
+
     describe "label_for" do
       it "should retrieve the label for a segment value" do
         d = build
