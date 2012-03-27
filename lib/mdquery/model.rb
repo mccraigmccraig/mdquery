@@ -7,6 +7,7 @@ require 'time'
 module MDQuery
   module Model
 
+    # casts which can be used to transform queried values
     CASTS = {
       :sym => lambda{|v| v.to_sym},
       :int => lambda{|v| v.to_i},

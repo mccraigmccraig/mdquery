@@ -3,6 +3,7 @@ require 'mdquery/util'
 module MDQuery
   module Dataset
 
+    # describes a value on a segment of a dimension
     class DimensionValue
       # DimensionSegment this value belongs to
       attr_reader :dimension_segment
@@ -30,6 +31,13 @@ module MDQuery
       end
     end
 
+    # describes a segment of a dimension, a segment being some part of
+    # the dimension value line. Dimension values should not be present
+    # in more than one segment of a dimension, or results will be
+    # unexpected, though it's fine for aggregate values to be present
+    # which cover the same range as other values. e.g. having values of
+    # "jan", "feb", "march"... in one segment and "q1","q2","q3","q4"
+    # in another segment is fine
     class DimensionSegment
       # Dimension this Segment belongs to
       attr_reader :dimension
@@ -66,28 +74,40 @@ module MDQuery
         "#<DimensionSegment: key=#{key.inspect}, dimension_values=#{dimension_values.inspect}>"
       end
 
+      # retrieve a DimensionValue describing the given +value+
       def dimension_value_for(value)
         @dimension_value_index[value]
       end
 
+      # retrieve a DimensionValue describing the given +value+
       def [](value)
         dimension_value_for(value)
       end
 
+      # retrieve a label describing the given +value+
       def label_for(value)
         (dv = dimension_value_for(value)) && dv.label
       end
     end
 
+    # describes a Dimension consisting of one or more segments
     class Dimension
+      # Dataset this Dimension belongs to
       attr_reader :dataset
 
+      # key for this Dimension
       attr_reader :key
+
+      # Optional label of the Dimension
       attr_reader :label
 
+      # ordered list of one or more DimensionSegments
       attr_reader :segments
 
-      # an ordered list of values for the dimension
+      # an ordered list of values for the dimension. May be static or
+      # extracted from the data source, depending on DimensionSegment
+      # definitions. It is the concatentation of the +values+ from each
+      # DimensionSegment in the Dimension
       attr_reader :values
 
       def initialize(model, dataset)
@@ -119,6 +139,7 @@ module MDQuery
         @segment_index[key]
       end
 
+      # lookup a segment by +key+
       def [](key)
         segment(key)
       end
@@ -134,6 +155,18 @@ module MDQuery
         end
       end
 
+      # return an ordered list of DimensionValues for 0 or more segments.
+      # * +segment_keys+ a list of segment keys. if empty, methods return all DimensionValues
+      # for all segments, otherwise returns the concatenation of DimensionValues for
+      # each identified segment
+      def dimension_values_for_segments(segment_keys)
+        if segment_keys && !segment_keys.empty?
+          segment_keys.map{|sk| segment(sk)}.map(&:dimension_values).reduce(&:+)
+        else
+          segments.map(&:dimension_values).reduce(&:+)
+        end
+      end
+
       # the DimensionValue describing +value+ or nil
       def dimension_value_for(value)
         @dimension_value_index[value]
@@ -145,9 +178,15 @@ module MDQuery
       end
     end
 
+    # describes a Measure computed from the source data over the Dimensions
     class Measure
+      # the +dataset+ this Measure belongs to
       attr_reader :dataset
+
+      # the +key+ identifying this Measure
       attr_reader :key
+
+      # the SQL fragment definition of the Measure
       attr_reader :definition
 
       def initialize(model, dataset)
@@ -168,12 +207,23 @@ module MDQuery
       end
     end
 
+    # a Dataset is defined over a number of Dimensions with a number of Measures.
+    #
     class Dataset
+      # the +Model+ describing how the +Dataset+ is to be assembled
       attr_reader :model
 
+      # a list of points. each point is a Hash with a value for each +Dimension+ and a value for each +Measure+.
+      # keys are as given in the +Dimension+ and +Measure+ objects
       attr_reader :data
+
+      # a Hash of +Dimensions+ keyed by their +keys+
       attr_reader :dimensions
+
+      # a Hash of +Measures+ keyed by their +keys+
       attr_reader :measures
+
+      # index of points from +data+, where key is a Hash of all Dimension {key=>value} pairs, and value is all Measure {key=>value} pairs
       attr_reader :indexed_data
 
       def initialize(model, data)

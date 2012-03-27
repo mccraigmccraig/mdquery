@@ -134,6 +134,15 @@ module MDQuery::Dataset
       end
     end
 
+    describe "dimension_values_for_segments" do
+      it "should extract DimensionValues belonging to a list of segments" do
+        d = build
+        d.dimension_values_for_segments(nil).should == [@s0v0, @s0v1, @s1v0, @s1v1]
+        d.dimension_values_for_segments([:segment1_key]).should == [@s1v0, @s1v1]
+        d.dimension_values_for_segments([:segment1_key, :segment0_key]).should == [@s1v0, @s1v1, @s0v0, @s0v1]
+      end
+    end
+
     describe "label_for" do
       it "should retrieve the label for a segment value" do
         d = build
