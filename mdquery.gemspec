@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "mdquery"
-  s.version = "0.1.0"
+  s.version = "0.3.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["mccraigmccraig"]
-  s.date = "2012-03-26"
+  s.date = "2012-03-27"
   s.description = "provides a DSL for simply specifying and executing segmented multi-dimensional queries on your active-record-3 models"
   s.email = "mccraigmccraig@gmail.com"
   s.extra_rdoc_files = [
@@ -31,6 +31,7 @@ Gem::Specification.new do |s|
     "lib/mdquery/dsl.rb",
     "lib/mdquery/model.rb",
     "lib/mdquery/util.rb",
+    "mdquery.gemspec",
     "spec/mdquery/dataset_spec.rb",
     "spec/mdquery/dsl_spec.rb",
     "spec/mdquery/model_spec.rb",
