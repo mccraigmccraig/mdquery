@@ -262,7 +262,7 @@ module MDQuery
       end
 
       # run the queries and put the results in a Dataset
-      def analyse
+      def collect
         MDQuery::Dataset::Dataset.new(self, do_queries)
       end
     end

@@ -449,7 +449,7 @@ module MDQuery
         end
       end
 
-      describe "analyse" do
+      describe "collect" do
         it "should do_queries and use the result to constract a Dataset" do
           dim0sm0 = Object.new
           dim0 = DimensionModel.new(:key=>:foo, :segment_models=>[dim0sm0])
@@ -464,7 +464,7 @@ module MDQuery
 
           mock(MDQuery::Dataset::Dataset).new(dm, dataset)
 
-          dm.analyse
+          dm.collect
 
         end
       end
