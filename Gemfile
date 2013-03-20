@@ -1,13 +1,13 @@
 source "http://rubygems.org"
 
-gem "activerecord", ">= 3.1.0"
+gem "activerecord", ">= 3.2.13"
 
 group :development do
-  gem "rake", "~> 0.9.2"
-  gem "rspec", "~> 2.8.0"
-  gem "rdoc", "~> 3.12"
-  gem "bundler", "~> 1.1.0"
-  gem "jeweler", "~> 1.8.3"
+  gem "rake", "~> 10.0.3"
+  gem "rspec", "~> 2.13.0"
+  gem "rdoc", "~> 4.0.0"
+  gem "bundler", "~> 1.3.4"
+  gem "jeweler", "~> 1.8.4"
 #  gem "rcov", ">= 0"
  gem 'rr', ">= 1.0.4"
 end
