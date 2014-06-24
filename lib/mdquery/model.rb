@@ -229,7 +229,7 @@ module MDQuery
 
         select_string = (dimension_select_strings + measure_select_strings).join(",")
 
-        group_string = region_segment_models.map(&:group_by_column).join(",")
+        group_string = (1..region_segment_models.length).to_a.join(",")
 
         narrowed_scope.select(select_string).group(group_string)
       end

@@ -375,9 +375,9 @@ module MDQuery
           select_string = "foofoo as foo,barbar as bar,count(*) as count"
 
           # group_string
-          mock(dim0sm0).group_by_column{"foo"}
-          mock(dim1sm0).group_by_column{"bar"}
-          group_string = "foo,bar"
+          # mock(dim0sm0).group_by_column{"foo"}
+          # mock(dim1sm0).group_by_column{"bar"}
+          group_string = "1,2"
 
           scope_n3 = Object.new
           query = Object.new
