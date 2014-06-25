@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["mccraigmccraig"]
-  s.date = "2014-06-24"
+  s.date = "2014-06-25"
   s.description = "provides a DSL for simply specifying and executing segmented multi-dimensional queries on your active-record-3 models"
   s.email = "mccraigmccraig@gmail.com"
   s.extra_rdoc_files = [
@@ -49,30 +49,30 @@ Gem::Specification.new do |s|
     s.specification_version = 4
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<activerecord>, [">= 3.2.13"])
-      s.add_development_dependency(%q<rake>, ["~> 10.2.2"])
-      s.add_development_dependency(%q<rspec>, ["~> 2.13.0"])
-      s.add_development_dependency(%q<rdoc>, ["~> 4.0.0"])
+      s.add_runtime_dependency(%q<activerecord>, [">= 3.2.18"])
+      s.add_development_dependency(%q<rake>, ["~> 10.3.2"])
+      s.add_development_dependency(%q<rspec>, ["~> 2.14.1"])
+      s.add_development_dependency(%q<rdoc>, ["~> 4.1.1"])
       s.add_development_dependency(%q<bundler>, ["~> 1.6.3"])
-      s.add_development_dependency(%q<jeweler>, ["~> 1.8.4"])
-      s.add_development_dependency(%q<rr>, [">= 1.0.4"])
+      s.add_development_dependency(%q<jeweler>, ["~> 2.0.1"])
+      s.add_development_dependency(%q<rr>, [">= 1.1.2"])
     else
-      s.add_dependency(%q<activerecord>, [">= 3.2.13"])
-      s.add_dependency(%q<rake>, ["~> 10.2.2"])
-      s.add_dependency(%q<rspec>, ["~> 2.13.0"])
-      s.add_dependency(%q<rdoc>, ["~> 4.0.0"])
+      s.add_dependency(%q<activerecord>, [">= 3.2.18"])
+      s.add_dependency(%q<rake>, ["~> 10.3.2"])
+      s.add_dependency(%q<rspec>, ["~> 2.14.1"])
+      s.add_dependency(%q<rdoc>, ["~> 4.1.1"])
       s.add_dependency(%q<bundler>, ["~> 1.6.3"])
-      s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
-      s.add_dependency(%q<rr>, [">= 1.0.4"])
+      s.add_dependency(%q<jeweler>, ["~> 2.0.1"])
+      s.add_dependency(%q<rr>, [">= 1.1.2"])
     end
   else
-    s.add_dependency(%q<activerecord>, [">= 3.2.13"])
-    s.add_dependency(%q<rake>, ["~> 10.2.2"])
-    s.add_dependency(%q<rspec>, ["~> 2.13.0"])
-    s.add_dependency(%q<rdoc>, ["~> 4.0.0"])
+    s.add_dependency(%q<activerecord>, [">= 3.2.18"])
+    s.add_dependency(%q<rake>, ["~> 10.3.2"])
+    s.add_dependency(%q<rspec>, ["~> 2.14.1"])
+    s.add_dependency(%q<rdoc>, ["~> 4.1.1"])
     s.add_dependency(%q<bundler>, ["~> 1.6.3"])
-    s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
-    s.add_dependency(%q<rr>, [">= 1.0.4"])
+    s.add_dependency(%q<jeweler>, ["~> 2.0.1"])
+    s.add_dependency(%q<rr>, [">= 1.1.2"])
   end
 end
 
